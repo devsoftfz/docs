@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/schema.json",
-  "name": "Starter Kit",
+  "name": "Bitnbox",
   "logo": {
     "dark": "/logo/dark.svg",
     "light": "/logo/light.svg"
@@ -15,15 +15,19 @@
       "to": "#07C983"
     }
   },
+  "openapi": ["/api-reference/openapi.json"],
+  "api": {
+    "baseUrl": "https://api.dev.bitnbox.io"
+  },
   "topbarLinks": [
     {
       "name": "Support",
-      "url": "mailto:hi@mintlify.com"
+      "url": "mailto:support@bitnbox.io"
     }
   ],
   "topbarCtaButton": {
     "name": "Dashboard",
-    "url": "https://dashboard.mintlify.com"
+    "url": "https://dev.app.bitnbox.io"
   },
   "tabs": [
     {
@@ -32,21 +36,6 @@
     }
   ],
   "anchors": [
-    {
-      "name": "Documentation",
-      "icon": "book-open-cover",
-      "url": "https://mintlify.com/docs"
-    },
-    {
-      "name": "Community",
-      "icon": "slack",
-      "url": "https://mintlify.com/community"
-    },
-    {
-      "name": "Blog",
-      "icon": "newspaper",
-      "url": "https://mintlify.com/blog"
-    }
   ],
   "navigation": [
     {
@@ -62,17 +51,13 @@
       "pages": ["api-reference/introduction"]
     },
     {
-      "group": "Endpoint Examples",
+      "group": "Payment",
       "pages": [
-        "api-reference/endpoint/get",
-        "api-reference/endpoint/create",
-        "api-reference/endpoint/delete"
+        "api-reference/endpoint/create-payment",
+        "api-reference/endpoint/status-payment"
       ]
     }
   ],
   "footerSocials": {
-    "twitter": "https://twitter.com/mintlify",
-    "github": "https://github.com/mintlify",
-    "linkedin": "https://www.linkedin.com/company/mintsearch"
   }
 }
