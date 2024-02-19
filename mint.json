@@ -56,6 +56,22 @@
         "api-reference/endpoint/create-payment",
         "api-reference/endpoint/status-payment"
       ]
+    },
+    {
+      "group": "Payout",
+      "pages": [
+        "api-reference/endpoint/create-payout",
+        "api-reference/endpoint/status-payout",
+        "api-reference/endpoint/payout-estimate-fee"
+      ]
+    },
+    {
+      "group": "Other",
+      "pages": [
+        "api-reference/endpoint/list-payout",
+        "api-reference/endpoint/balance",
+        "api-reference/endpoint/currencies"
+      ]
     }
   ],
   "footerSocials": {

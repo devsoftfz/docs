@@ -15,7 +15,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Unique identifier of the payment"
           }
         ],
         "operationId": "apiPaymentStatus",
@@ -61,6 +62,17 @@
                       "type": "string",
                       "format": "date-time",
                       "description": "Date of creation"
+                    },
+                    "payCurrency": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "name"
+                      ]
                     }
                   },
                   "required": [
@@ -70,8 +82,10 @@
                     "payAmount",
                     "paidAmount",
                     "paidAddress",
-                    "createdAt"
-                  ]
+                    "createdAt",
+                    "payCurrency"
+                  ],
+                  "description": "Successful response with payment status details"
                 }
               }
             }
@@ -81,7 +95,7 @@
     },
     "/v1/payment": {
       "post": {
-        "description": "Creates a payment link. You need to provide the amount and the currency of the payment in the request.",
+        "description": "Creates a payment. You need to provide the amount and the currency of the payment in the request.",
         "summary": "Create payment",
         "tags": [
           "v1"
@@ -114,11 +128,6 @@
                     "type": "string",
                     "description": "Cryptocurrency network"
                   },
-                  "webhookUrl": {
-                    "type": "string",
-                    "format": "uri",
-                    "description": "URL for webhook"
-                  },
                   "customerId": {
                     "type": "string",
                     "minLength": 1,
@@ -138,10 +147,10 @@
                   "amount",
                   "payCurrency",
                   "payNetwork",
-                  "webhookUrl",
                   "customerId",
                   "customerIp"
-                ]
+                ],
+                "description": "Payment creation request body"
               }
             }
           }
@@ -197,11 +206,6 @@
                       "type": "string",
                       "description": "Payment status"
                     },
-                    "webhookUrl": {
-                      "type": "string",
-                      "format": "uri",
-                      "description": "URL for webhook"
-                    },
                     "additionalData": {
                       "type": "string",
                       "description": "Additional data"
@@ -222,9 +226,9 @@
                     "fee",
                     "id",
                     "status",
-                    "webhookUrl",
                     "createdAt"
-                  ]
+                  ],
+                  "description": "Payment link creation successful"
                 }
               }
             }
@@ -237,16 +241,474 @@
                   "type": "object",
                   "properties": {
                     "code": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Error code"
                     },
                     "message": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Error message"
                     }
                   },
                   "required": [
                     "code",
                     "message"
-                  ]
+                  ],
+                  "description": "Server error response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/payout": {
+      "post": {
+        "description": "Creates a payout",
+        "summary": "Create payout",
+        "tags": [
+          "v1"
+        ],
+        "parameters": [],
+        "operationId": "apiCreateWithdrawal",
+        "requestBody": {
+          "description": "Body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "network": {
+                    "type": "string",
+                    "description": "Blockchain network for withdrawal"
+                  },
+                  "currency": {
+                    "type": "string",
+                    "description": "Currency for withdrawal"
+                  },
+                  "amount": {
+                    "type": "number",
+                    "description": "Amount to withdraw"
+                  },
+                  "feeByUser": {
+                    "type": "boolean",
+                    "description": "Whether the withdrawal fee is borne by the user"
+                  },
+                  "walletAddress": {
+                    "type": "string",
+                    "description": "User's wallet address"
+                  },
+                  "customerId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Customer ID (for security)"
+                  },
+                  "customerIp": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Customer IP address (for security)"
+                  },
+                  "additionalData": {
+                    "type": "string",
+                    "description": "Additional data for the withdrawal"
+                  }
+                },
+                "required": [
+                  "network",
+                  "currency",
+                  "amount",
+                  "feeByUser",
+                  "walletAddress",
+                  "customerId",
+                  "customerIp"
+                ],
+                "description": "Withdrawal creation request body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Withdrawal ID"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Withdrawal status"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "status"
+                  ],
+                  "description": "Successful withdrawal creation response"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "description": "Error code"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ],
+                  "description": "Server error response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/payout/{id}/status": {
+      "get": {
+        "tags": [
+          "v1"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Unique identifier of the withdrawal"
+          }
+        ],
+        "operationId": "apiGetWithdrawalStatus",
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Withdrawal ID"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Current status of the withdrawal"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "status"
+                  ],
+                  "description": "Successful response with withdrawal status details"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "description": "Error code"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ],
+                  "description": "Server error response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/balance": {
+      "get": {
+        "tags": [
+          "v1"
+        ],
+        "parameters": [
+          {
+            "name": "currency",
+            "in": "query",
+            "description": "Filter by currency",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "network",
+            "in": "query",
+            "description": "Filter by network",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "apiGetBalance",
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "currency": {
+                        "type": "string",
+                        "description": "Currency of the balance"
+                      },
+                      "network": {
+                        "type": "string",
+                        "description": "Network of the balance"
+                      },
+                      "amount": {
+                        "type": "number",
+                        "description": "Amount available"
+                      }
+                    },
+                    "required": [
+                      "currency",
+                      "network",
+                      "amount"
+                    ]
+                  },
+                  "description": "Successful response with balance details"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/payout/list": {
+      "get": {
+        "tags": [
+          "v1"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Limit for pagination",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "nullable": true
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Offset for pagination",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "nullable": true
+            }
+          }
+        ],
+        "operationId": "apiGetPayout",
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "payout": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "amount": {
+                            "type": "number",
+                            "nullable": true
+                          },
+                          "payCurrency": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "name"
+                            ]
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "payoutWallet": {
+                            "type": "object",
+                            "properties": {
+                              "label": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "label"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "status",
+                          "amount",
+                          "payCurrency",
+                          "createdAt",
+                          "payoutWallet"
+                        ]
+                      },
+                      "description": "List of payouts"
+                    },
+                    "count": {
+                      "type": "number",
+                      "description": "Total count of payouts"
+                    }
+                  },
+                  "required": [
+                    "payout",
+                    "count"
+                  ],
+                  "description": "Successful response with list of payouts"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/currencies": {
+      "get": {
+        "tags": [
+          "v1"
+        ],
+        "parameters": [],
+        "operationId": "apiGetCurrencies",
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "currency": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Currency identifier"
+                      },
+                      "network": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Network identifier"
+                      }
+                    },
+                    "required": [
+                      "currency",
+                      "network"
+                    ]
+                  },
+                  "description": "Successful response with available currencies and networks"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/payout/estimate-fee": {
+      "get": {
+        "tags": [
+          "v1"
+        ],
+        "parameters": [
+          {
+            "name": "currency",
+            "in": "query",
+            "description": "Currency for which to estimate fee",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "network",
+            "in": "query",
+            "description": "Network for which to estimate fee",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "apiGetEstimateFee",
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "currency": {
+                      "type": "string",
+                      "description": "Currency of the fee"
+                    },
+                    "network": {
+                      "type": "string",
+                      "description": "Network of the fee"
+                    },
+                    "amount": {
+                      "type": "number",
+                      "description": "Estimated fee amount"
+                    }
+                  },
+                  "required": [
+                    "currency",
+                    "network",
+                    "amount"
+                  ],
+                  "description": "Successful response with estimated fee details"
                 }
               }
             }
@@ -271,7 +733,7 @@
   ],
   "servers": [
     {
-      "url": "https://api.dev.bitnbox.io"
+      "url": "https://api.bitnbox.io"
     }
   ],
   "info": {
